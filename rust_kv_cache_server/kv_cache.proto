@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package kv_cache;
+
+// Request message containing all possible operations
+message Request {
+  oneof request_type {
+    PingRequest ping = 1;
+    ShutdownRequest shutdown = 2;
+    AllocateRequest allocate = 3;
+    FreeRequest free = 4;
+    FreeBlocksByIdRequest free_blocks_by_id = 5;
+    TouchRequest touch = 6;
+    GetCachedBlockRequest get_cached_block = 7;
+    CacheFullBlocksRequest cache_full_blocks = 8;
+    GetStatsRequest get_stats = 9;
+    GetAllFreeBlocksRequest get_all_free_blocks = 10;
+    ResetPrefixCacheRequest reset_prefix_cache = 11;
+  }
+}
+
+// Response message
+message Response {
+  bool success = 1;
+  string error = 2;
+  
+  oneof response_type {
+    VoidResponse void = 3;
+    AllocateResponse allocate = 4;
+    StatsResponse stats = 5;
+    BlockIdsResponse block_ids = 6;
+  }
+}
+
+// Request types
+message PingRequest {}
+message ShutdownRequest {}
+
+message AllocateRequest {
+  string request_id = 1;
+  uint32 num_blocks = 2;
+}
+
+message FreeRequest {
+  string request_id = 1;
+}
+
+message FreeBlocksByIdRequest {
+  repeated uint32 block_ids = 1;
+}
+
+message TouchRequest {
+  repeated uint32 block_ids = 1;
+}
+
+message GetCachedBlockRequest {
+  string hash = 1;
+}
+
+message CacheFullBlocksRequest {
+  repeated string hashes = 1;
+  repeated uint32 block_ids = 2;
+}
+
+message GetStatsRequest {}
+message GetAllFreeBlocksRequest {}
+message ResetPrefixCacheRequest {}
+
+// Response types
+message VoidResponse {}
+
+message AllocateResponse {
+  repeated uint32 block_ids = 1;
+}
+
+message StatsResponse {
+  uint32 num_total_blocks = 1;
+  uint32 num_free_blocks = 2;
+  uint32 num_cached_blocks = 3;
+}
+
+message BlockIdsResponse {
+  repeated uint32 block_ids = 1;
+}

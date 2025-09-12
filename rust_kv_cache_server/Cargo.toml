@@ -1,0 +1,25 @@
+[package]
+name = "kv_cache_server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+zmq = "0.10"
+signal-hook = "0.3"
+rustc-hash = "1.1"
+prost = "0.14"
+bytes = "1.10"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-chrome = "0.7"
+
+[target.'cfg(not(target_env = "msvc"))'.dependencies]
+tikv-jemallocator = "0.6"
+
+[[bin]]
+name = "kv_cache_server"
+path = "src/main.rs"
+
+
+[build-dependencies]
+prost-build = "0.14"
