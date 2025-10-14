@@ -1,0 +1,247 @@
+syntax = "proto3";
+
+package kv_cache;
+
+// Service definition for KV cache management
+service KvCacheService {
+    // Initialize the KV cache manager
+    rpc Initialize(InitializeRequest) returns (InitializeResponse);
+
+    // Allocate slots for a request
+    rpc AllocateSlots(AllocateSlotsRequest) returns (AllocateSlotsResponse);
+
+    // Free blocks for a request
+    rpc FreeBlocks(FreeBlocksRequest) returns (FreeBlocksResponse);
+
+    // Get computed blocks for prefix caching
+    rpc GetComputedBlocks(GetComputedBlocksRequest) returns (GetComputedBlocksResponse);
+
+    // Get number of free blocks
+    rpc GetNumFreeBlocks(GetNumFreeBlocksRequest) returns (GetNumFreeBlocksResponse);
+
+    // Get cache usage statistics
+    rpc GetUsage(GetUsageRequest) returns (GetUsageResponse);
+
+    // Reset prefix cache
+    rpc ResetPrefixCache(ResetPrefixCacheRequest) returns (ResetPrefixCacheResponse);
+
+    // Get blocks for a request
+    rpc GetBlocks(GetBlocksRequest) returns (GetBlocksResponse);
+
+    // Get block IDs for a request
+    rpc GetBlockIds(GetBlockIdsRequest) returns (GetBlockIdsResponse);
+
+    // Cache computed blocks
+    rpc CacheBlocks(CacheBlocksRequest) returns (CacheBlocksResponse);
+
+    // Take KV cache events
+    rpc TakeEvents(TakeEventsRequest) returns (TakeEventsResponse);
+
+    // Get number of common prefix blocks
+    rpc GetNumCommonPrefixBlocks(GetNumCommonPrefixBlocksRequest) returns (GetNumCommonPrefixBlocksResponse);
+
+    // Get prefix cache stats
+    rpc GetPrefixCacheStats(GetPrefixCacheStatsRequest) returns (GetPrefixCacheStatsResponse);
+
+    // Graceful shutdown
+    rpc Shutdown(ShutdownRequest) returns (ShutdownResponse);
+
+    // Health check
+    rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+// Basic types
+message BlockId {
+    uint32 id = 1;
+}
+
+message KvCacheBlock {
+    uint32 block_id = 1;
+    uint32 ref_count = 2;
+    bool is_cached = 3;
+    bytes block_hash = 4;  // Optional hash for prefix caching
+}
+
+message KvCacheConfig {
+    uint32 num_blocks = 1;
+    uint32 block_size = 2;
+    bool enable_prefix_caching = 3;
+    bool use_eagle = 4;
+    uint32 num_heads = 5;
+    uint32 sliding_window = 6;
+    uint32 attention_chunk_size = 7;
+}
+
+// Request types
+message Request {
+    string request_id = 1;
+    repeated int32 prompt_token_ids = 2;
+    repeated int32 output_token_ids = 3;
+    uint32 num_computed_tokens = 4;
+    repeated bytes block_hashes = 5;
+    int32 priority = 6;
+}
+
+// Initialize
+message InitializeRequest {
+    KvCacheConfig config = 1;
+    uint32 max_model_len = 2;
+    bool log_stats = 3;
+}
+
+message InitializeResponse {
+    bool success = 1;
+    string error = 2;
+    uint32 total_blocks = 3;
+}
+
+// AllocateSlots
+message AllocateSlotsRequest {
+    Request request = 1;
+    uint32 num_computed_tokens = 2;
+    uint32 num_new_tokens = 3;
+    repeated int32 spec_token_ids = 4;
+}
+
+message AllocateSlotsResponse {
+    bool success = 1;
+    string error = 2;
+    repeated KvCacheBlock allocated_blocks = 3;
+    repeated uint32 block_ids = 4;  // Flattened block IDs for each KV cache group
+}
+
+// FreeBlocks
+message FreeBlocksRequest {
+    string request_id = 1;
+}
+
+message FreeBlocksResponse {
+    bool success = 1;
+    string error = 2;
+    uint32 freed_blocks = 3;
+}
+
+// GetComputedBlocks
+message GetComputedBlocksRequest {
+    Request request = 1;
+}
+
+message GetComputedBlocksResponse {
+    bool success = 1;
+    string error = 2;
+    repeated KvCacheBlock computed_blocks = 3;
+    uint32 num_computed_tokens = 4;
+}
+
+// GetNumFreeBlocks
+message GetNumFreeBlocksRequest {}
+
+message GetNumFreeBlocksResponse {
+    uint32 num_free_blocks = 1;
+}
+
+// GetUsage
+message GetUsageRequest {}
+
+message GetUsageResponse {
+    float usage = 1;  // 0.0 to 1.0
+    uint32 used_blocks = 2;
+    uint32 total_blocks = 3;
+}
+
+// ResetPrefixCache
+message ResetPrefixCacheRequest {}
+
+message ResetPrefixCacheResponse {
+    bool success = 1;
+    string error = 2;
+}
+
+// Shutdown
+message ShutdownRequest {
+    bool graceful = 1;
+}
+
+message ShutdownResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+// Health check
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+    bool healthy = 1;
+    string status = 2;
+    uint64 uptime_seconds = 3;
+}
+
+// GetBlocks
+message GetBlocksRequest {
+    string request_id = 1;
+}
+
+message GetBlocksResponse {
+    bool success = 1;
+    string error = 2;
+    repeated uint32 block_ids = 3;  // Flattened block IDs for each KV cache group
+}
+
+// GetBlockIds
+message GetBlockIdsRequest {
+    string request_id = 1;
+}
+
+message GetBlockIdsResponse {
+    bool success = 1;
+    string error = 2;
+    repeated uint32 block_ids = 3;  // Flattened block IDs for each KV cache group
+}
+
+// CacheBlocks
+message CacheBlocksRequest {
+    Request request = 1;
+    uint32 num_computed_tokens = 2;
+}
+
+message CacheBlocksResponse {
+    bool success = 1;
+    string error = 2;
+}
+
+// TakeEvents
+message KvCacheEvent {
+    string type = 1;
+    string request_id = 2;
+    bytes event_data = 3;
+}
+
+message TakeEventsRequest {}
+
+message TakeEventsResponse {
+    repeated KvCacheEvent events = 1;
+}
+
+// GetNumCommonPrefixBlocks
+message GetNumCommonPrefixBlocksRequest {
+    Request request1 = 1;
+    Request request2 = 2;
+}
+
+message GetNumCommonPrefixBlocksResponse {
+    uint32 num_common_blocks = 1;
+}
+
+// GetPrefixCacheStats
+message GetPrefixCacheStatsRequest {}
+
+message PrefixCacheStats {
+    uint32 num_cached_tokens = 1;
+    uint32 num_queries = 2;
+    uint32 num_hits = 3;
+}
+
+message GetPrefixCacheStatsResponse {
+    bool has_stats = 1;
+    PrefixCacheStats stats = 2;
+}
