@@ -81,3 +81,4 @@ h2>=4.4.1
 pydantic-settings>=2.14.2
 fonttools>=4.60.2
 pygments>=2.20.0
+toolz
