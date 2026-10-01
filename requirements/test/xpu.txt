@@ -1095,6 +1095,8 @@ tokenizers==0.23.1
     #   -r requirements/test/../common.txt
     #   cohere
     #   transformers
+toolz==1.1.0
+    # via -r requirements/test/xpu.in
 torch==2.14.0+xpu
     # via
     #   -c requirements/xpu.txt
