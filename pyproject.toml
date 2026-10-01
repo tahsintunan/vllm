@@ -267,4 +267,3 @@ no-build-isolation-package = ["torch"]
 # module without downloading tiktoken vocabularies at runtime. Installing
 # openai-harmony alongside it silently overwrites those files, so keep it out
 # of every resolution; gpt-oss pulls it in transitively.
-exclude-dependencies = ["openai-harmony"]
