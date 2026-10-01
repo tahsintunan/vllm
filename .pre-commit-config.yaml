@@ -1,3 +1,4 @@
+# pctest3 comment
 default_install_hook_types:
   - pre-commit
   - commit-msg
